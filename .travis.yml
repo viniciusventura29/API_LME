@@ -1,0 +1,12 @@
+language: python
+python:
+  - "3.9-dev"
+install:
+  - pip install -r requirements-dev.txt codecov
+# command to run tests
+script:
+  - flake8 .
+  - pycodestyle .
+  - coverage run -m pytest -v
+after_success:
+  - codecov
