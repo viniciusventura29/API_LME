@@ -54,9 +54,19 @@ def get_prices():
     media_niquel = 0
     media_dolar = 0
 
+    diaas=list()
+    zinco=list()
+    cobre=list()
+    aluminio=list()
+    chumbo=list()
+    estanho=list()
+    niquel=list()
+    dolar=list()
+
     for price in prices:
         dia = datetime.strptime(price["data"], "%Y-%m-%d").strftime("%d/%m/%Y")
         semana_numero = datetime.strptime(dia, "%d/%m/%Y").strftime("%U")
+        diaas.append(dia)
 
         dias += 1
         media_zinco += Decimal(price["zinco"])
@@ -66,6 +76,13 @@ def get_prices():
         media_estanho += Decimal(price["estanho"])
         media_niquel += Decimal(price["niquel"])
         media_dolar += Decimal(price["dolar"])
+
+        if dia == 1 or dia == 0 or dia == 2:
+            diaas.append(dia)
+        print(diaas)
+        
+        print(price['zinco'])
+        
 
         if semana_numero == ultima_semana:
             table.add_row(f'{dia} - {semana_numero}', price["zinco"],
@@ -107,38 +124,36 @@ def get_prices():
             media_dolar = 0
             ultima_semana = semana_numero
 
-    today = dt.date.today()
+        today = dt.date.today()
+        
+        firstday_acctual_month = today+relativedelta(day=1)
+        firstday_next_month = firstday_acctual_month+relativedelta(months=+1)
+        lastday_acctual_month = firstday_next_month+relativedelta(days=-1)
+        
+        lastday_last_month = firstday_acctual_month+relativedelta(days=-1)
+        firstday_last_month = lastday_last_month+relativedelta(day=1)
+
     
-    firstday_acctual_month = today+relativedelta(day=1)
-    firstday_next_month = firstday_acctual_month+relativedelta(months=+1)
-    lastday_acctual_month = firstday_next_month+relativedelta(days=-1)
-    
-    lastday_last_month = firstday_acctual_month+relativedelta(days=-1)
-    firstday_last_month = lastday_last_month+relativedelta(day=1)
 
-    print(lastday_last_month.strftime("%d/%m/%Y"))
-    print(firstday_last_month.strftime("%d/%m/%Y"))
-    print(lastday_acctual_month.strftime("%d/%m/%Y"))
+        if today == lastday_acctual_month:
+            print("today is the day")
 
-    if today == lastday_acctual_month:
-        print("today is the day")
+        else:
+            df = pd.DataFrame({
+                'Day': diaas,
+                'zinco': price['zinco'],
+                'cobre':price["cobre"],
+                'aluminio':price["aluminio"],
+                'chumbo':price["chumbo"],
+                'estanho':price["estanho"],
+                'niquel':price["niquel"],
+                'dolar':price["dolar"]})
 
-    else:
-         df = pd.DataFrame({
-            'Day': ["ex"],
-            'Zinco': price['zinco'],
-            'cobre':price["cobre"],
-            'aluminio':price["aluminio"],
-            'chumbo':price["chumbo"],
-            'estanho':price["estanho"],
-            'niquel':price["niquel"],
-            'dolar':price["dolar"]})
+            writer = pd.ExcelWriter('demo.xlsx', engine='xlsxwriter')
 
-         writer = pd.ExcelWriter('demo.xlsx', engine='xlsxwriter')
+            df.to_excel(writer, sheet_name='main', index=False)
 
-         df.to_excel(writer, sheet_name='main', index=False)
-
-         writer.save()
+            writer.save()
 
     
 
