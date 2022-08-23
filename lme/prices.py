@@ -10,6 +10,9 @@ from rich.table import Table
 import datetime as dt
 from dateutil.relativedelta import *
 
+import win32com.client as win32
+
+
 
 def media(valor, dias):
     _media = valor / dias
@@ -137,6 +140,18 @@ def get_prices():
 
         if today == lastday_acctual_month:
             print("today is the day")
+            outlook = win32.Dispatch('outlook.application')
+            mail = outlook.CreateItem(0)
+            mail.To = 'Email to'
+            mail.Subject = 'Email title'
+            mail.Body = 'Email text body'
+
+
+            # To attach a file to the email (optional):
+            attachment  = r"C:\Users\ct67ca\Desktop\emailSend\docTeste.docx"
+            mail.Attachments.Add(attachment)
+
+mail.Send()
 
         else:
             df = pd.DataFrame({
