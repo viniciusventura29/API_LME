@@ -13,12 +13,24 @@ from dateutil.relativedelta import *
 import win32com.client as win32
 
 
+def send_email():
+    #send email
+    outlook = win32.Dispatch('outlook.application')
+    mail = outlook.CreateItem(0)
+    mail.To = 'viniciusventura29@gmail.com'
+    mail.Subject = 'Automation project test'
+    mail.Body = 'This is a test for a project. disregard this email'
+
+    # To attach a file to the email
+    attachment  = r"C:\Users\ct67ca\Desktop\API_LME\lme\LME.xlsx"
+    mail.Attachments.Add(attachment)
+
+    mail.Send()
 
 def media(valor, dias):
     _media = valor / dias
 
     return str(round(Decimal(_media), ndigits=2))
-
 
 def get_prices():
     url_base = "https://lme.gorilaxpress.com/cotacao"
@@ -69,7 +81,15 @@ def get_prices():
     for price in prices:
         dia = datetime.strptime(price["data"], "%Y-%m-%d").strftime("%d/%m/%Y")
         semana_numero = datetime.strptime(dia, "%d/%m/%Y").strftime("%U")
+        
         diaas.append(dia)
+        zinco.append(price['zinco'])
+        cobre.append(price['cobre'])
+        aluminio.append(price['aluminio'])
+        chumbo.append(price['chumbo'])
+        estanho.append(price['estanho'])
+        niquel.append(price['niquel'])
+        dolar.append(price['dolar'])
 
         dias += 1
         media_zinco += Decimal(price["zinco"])
@@ -82,9 +102,6 @@ def get_prices():
 
         if dia == 1 or dia == 0 or dia == 2:
             diaas.append(dia)
-        print(diaas)
-        
-        print(price['zinco'])
         
 
         if semana_numero == ultima_semana:
@@ -140,41 +157,33 @@ def get_prices():
 
         if today == lastday_acctual_month:
             print("today is the day")
-            outlook = win32.Dispatch('outlook.application')
-            mail = outlook.CreateItem(0)
-            mail.To = 'Email to'
-            mail.Subject = 'Email title'
-            mail.Body = 'Email text body'
-
-
-            # To attach a file to the email (optional):
-            attachment  = r"C:\Users\ct67ca\Desktop\emailSend\docTeste.docx"
-            mail.Attachments.Add(attachment)
-
-mail.Send()
+            
 
         else:
+            #add datas to the excel file
             df = pd.DataFrame({
                 'Day': diaas,
-                'zinco': price['zinco'],
-                'cobre':price["cobre"],
-                'aluminio':price["aluminio"],
-                'chumbo':price["chumbo"],
-                'estanho':price["estanho"],
-                'niquel':price["niquel"],
-                'dolar':price["dolar"]})
+                'zinco': zinco,
+                'cobre':cobre,
+                'aluminio':aluminio,
+                'chumbo':chumbo,
+                'estanho':estanho,
+                'niquel':niquel,
+                'dolar':dolar})
 
-            writer = pd.ExcelWriter('demo.xlsx', engine='xlsxwriter')
+            writer = pd.ExcelWriter('LME.xlsx', engine='xlsxwriter')
 
             df.to_excel(writer, sheet_name='main', index=False)
-
+            #save the excel
             writer.save()
+
 
     
 
     console = Console()
     console.print(table, justify="center")
 
-
+    
 if __name__ == "__main__":
     get_prices()
+    send_email()
